@@ -8,13 +8,19 @@ from auth import auth_bp,jwt,allow
 from datetime import timedelta
 import os 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.environ.get(
-    "DB_URI", f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}")
 
+# Get database URL and ensure proper scheme
+database_url = os.environ.get('DATABASE_URL', 'postgresql://matwana_user:Mrtbd5JQP19Nevw2ZythcUnlGeLveAkv@dpg-cvg0rr2j1k6c73a9q86g-a/matwana_prod')
+
+# Mandatory SSL for Render PostgreSQL
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+if 'render.com' in database_url:
+    database_url += "?sslmode=require"
 app=Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG'] = True
 app.config['FLASK_ENV'] = 'development'
@@ -510,5 +516,4 @@ api.add_resource(Userparcels,'/assignments/<int:id>')
             
         
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
+  app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
