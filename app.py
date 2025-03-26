@@ -1,6 +1,6 @@
 from models import db,User,Parcel,Vehicle,Location,UserParcelAssignment
-from flask_migrate import Migrate
 from flask import Flask, request, make_response, jsonify
+from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required
 from flask_cors import CORS
@@ -9,18 +9,13 @@ from datetime import timedelta
 import os 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-# Get database URL and ensure proper scheme
-database_url = os.environ.get('DATABASE_URL', 'postgresql://matwana_user:Mrtbd5JQP19Nevw2ZythcUnlGeLveAkv@dpg-cvg0rr2j1k6c73a9q86g-a/matwana_prod')
+DATABASE = os.environ.get(
+    "DB_URI", f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}")
 
-# Mandatory SSL for Render PostgreSQL
-if database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
-if 'render.com' in database_url:
-    database_url += "?sslmode=require"
 app=Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG'] = True
 app.config['FLASK_ENV'] = 'development'
@@ -32,6 +27,7 @@ app.json.compact = False
 
 db.init_app(app)
 jwt.init_app(app)
+migrate = Migrate(app, db)
 api=Api(app)
 
 
